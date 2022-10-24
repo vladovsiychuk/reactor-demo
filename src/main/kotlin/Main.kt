@@ -1,16 +1,29 @@
 import reactor.core.publisher.Mono
 
 fun main(args: Array<String>) {
-    testErrorHandling()
+//        testErrorHandling()
+    testCompletable()
+}
+
+private fun testCompletable() {
+    completableMethod()
+        .map {
+            println("inside map")
+        }
+        .subscribe()
+}
+
+private fun completableMethod(): Mono<Unit> {
+    return if (true) {
+        Mono.just(Unit)
+    } else {
+        Mono.error(Exception("Some exception"))
+    }
 }
 
 private fun testErrorHandling() {
-    Mono.empty<Int>()
-        .switchIfEmpty(Mono.error(NoSuchElementException("Element was not found")))
-        .flatMap {
-            Mono.empty<Int>()
+    Mono.error<Int>(Exception("some error"))
+        .subscribe {
+            println(it)
         }
-        .switchIfEmpty(Mono.error(NoSuchElementException("Second error message")))
-        .onErrorResume { Mono.error(it) }
-        .subscribe()
 }
