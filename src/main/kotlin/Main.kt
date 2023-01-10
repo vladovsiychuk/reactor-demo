@@ -37,7 +37,7 @@ fun printSomething(def: (abc: String) -> Mono<String>): Mono<String> {
 }
 
 private fun completableMethod(): Mono<Unit> {
-    return if (false) {
+    return if (true) {
         Mono.empty()
     } else {
         Mono.error(Exception("Some exception"))
