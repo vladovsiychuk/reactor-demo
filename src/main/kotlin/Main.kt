@@ -1,62 +1,38 @@
 import reactor.core.publisher.Mono
 import reactor.core.publisher.switchIfEmpty
+import java.sql.Wrapper
 
 fun main(args: Array<String>) {
-    //    testErrorHandling()
-    testCompletable()
-    //    testEmpty()
+
+    test()
 }
 
-fun testEmpty() {
-    Mono.empty<Int>()
-        .doOnError {
-            println("inside error subscribe")
-        }
-        .switchIfEmpty {
-            Mono.error(NoSuchElementException("not found exception"))
-        }
-        .subscribe()
-}
-
-private fun testCompletable() {
-    completableMethod()
-        .then(printSomething() { myString ->
-            println(myString)
-            Mono.just("Inside then")
-                .map{
-                    println(it)
-                    it
-                }
-        })
-        .subscribe()
-}
-
-fun printSomething(def: (abc: String) -> Mono<String>): Mono<String> {
-    println("A")
-    return def("D")
-}
-
-private fun completableMethod(): Mono<Unit> {
-    return if (true) {
-        Mono.empty()
-    } else {
-        Mono.error(Exception("Some exception"))
-    }
-}
-
-private fun testErrorHandling() {
-    Mono.just(1)
+fun test() {
+    Mono.just("A")
         .flatMap {
-            Mono.error<Exception>(Exception("A"))
-                .doOnError {
-                    println("B")
-                }
-                .map {
-                    println("C")
-                    it
-                }
+            monoVoid(it)
         }
-        .subscribe({}, {
-            println("D")
-        })
+        .then(
+            Mono.just("B")
+                .flatMap {
+                  Mono.just(0)
+//                  monoVoid(it)
+                }
+                .switchIfEmpty(
+                    Mono.just("C")
+                        .map {
+                            println(it)
+                        }
+                        .flatMap {
+                            Mono.empty()
+                        }
+                )
+        )
+        .subscribe()
+}
+
+fun monoVoid(value: String): Mono<Void> {
+    println(value)
+
+    return Mono.empty()
 }
